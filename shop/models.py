@@ -15,7 +15,7 @@ class Category(models.Model):
     Represents a category for organizing products.
     """
     name = models.CharField('Category', max_length=250, db_index=True)
-    parent = models.ForeignKey('Parent Category',
+    parent = models.ForeignKey(
         'self', on_delete=models.CASCADE, null=True, blank=True, related_name='children'
         )
     slug = models.SlugField('URL', max_length=250, unique=True, null=False, editable=True)
@@ -53,6 +53,7 @@ class Product(models.Model):
     slug = models.SlugField('URL', max_length=250, unique=True)
     price = models.DecimalField('Price', max_digits=7, decimal_places=2, default=99.99)
     image = models.ImageField('Image', upload_to='products/%Y/%m/%d', blank=True)
+    available = models.BooleanField('Available', default=True)
     created_at = models.DateTimeField('Create date', auto_now_add=True)
     updated_at = models.DateTimeField('Update date', auto_now=True)
 
@@ -67,13 +68,16 @@ class Product(models.Model):
     #     return reverse("model_detail", kwargs={"pk": self.pk})
 
 class ProductManager(models.Manager):
+    """
+    Custom manager to filter products by availability.
+    """
     def get_queryset(self):
-        """
-        Return a queryset filtered by availability.
-        """
         return super(ProductManager, self).get_queryset().filter(available=True)
     
 class ProductProxy(Product):
+    """
+    Proxy model to enable product availability filtering.
+    """
 
     objects = ProductManager()
 
