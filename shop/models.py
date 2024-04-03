@@ -11,6 +11,9 @@ def rand_slug():
     return ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(3))
 
 class Category(models.Model):
+    """
+    Represents a category for organizing products.
+    """
     name = models.CharField('Category', max_length=250, db_index=True)
     parent = models.ForeignKey('Parent Category',
         'self', on_delete=models.CASCADE, null=True, blank=True, related_name='children'
@@ -39,24 +42,40 @@ class Category(models.Model):
     # def get_absolute_url(self):
     #     return reverse("model_detail", kwargs={"pk": self.pk})
     
-    class Product(models.Model):
-        category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
-        title = models.CharField('Title', max_length=250)
-        brand = models.CharField('Brand', max_length=250)
-        description = models.TextField('Description', blank=True)
-        slug = models.SlugField('URL', max_length=250, unique=True)
-        price = models.DecimalField('Price', max_digits=7, decimal_places=2, default=99.99)
-        image = models.ImageField('Image', upload_to='products/%Y/%m/%d', blank=True)
-        created_at = models.DateTimeField('Create date', auto_now_add=True)
-        updated_at = models.DateTimeField('Update date', auto_now=True)
+class Product(models.Model):
+    """
+    Represents a product available for sale.
+    """
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
+    title = models.CharField('Title', max_length=250)
+    brand = models.CharField('Brand', max_length=250)
+    description = models.TextField('Description', blank=True)
+    slug = models.SlugField('URL', max_length=250, unique=True)
+    price = models.DecimalField('Price', max_digits=7, decimal_places=2, default=99.99)
+    image = models.ImageField('Image', upload_to='products/%Y/%m/%d', blank=True)
+    created_at = models.DateTimeField('Create date', auto_now_add=True)
+    updated_at = models.DateTimeField('Update date', auto_now=True)
 
-        class Meta:
-            verbose_name = 'Product'
-            verbose_name_plural = 'Products'
+    class Meta:
+        verbose_name = 'Product'
+        verbose_name_plural = 'Products'
 
-        def __str__(self):
-            return self.title
+    def __str__(self):
+        return self.title
         
-        # def get_absolute_url(self):
-        #     return reverse("model_detail", kwargs={"pk": self.pk})
-        
+    # def get_absolute_url(self):
+    #     return reverse("model_detail", kwargs={"pk": self.pk})
+
+class ProductManager(models.Manager):
+    def get_queryset(self):
+        """
+        Return a queryset filtered by availability.
+        """
+        return super(ProductManager, self).get_queryset().filter(available=True)
+    
+class ProductProxy(Product):
+
+    objects = ProductManager()
+
+    class Meta:
+        proxy = True
