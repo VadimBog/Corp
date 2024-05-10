@@ -13,7 +13,7 @@ class UserCreationForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super(UserCreationForm, self).__init__(*args, **kwargs)
 
-        self.fields['email'].lable = 'Youe Email Address'
+        self.fields['email'].lable = 'Your Email Address'
         self.fields['email'].required = True
         self.fields['username'].help_text = ''
         self.fields['password1'].help_text = ''
@@ -23,5 +23,4 @@ class UserCreationForm(UserCreationForm):
 
         if User.objects.filter(email=email).exists() and len(email) > 254:
             raise forms.ValidationError("Email is already in use or too long.")
-
         return email    
