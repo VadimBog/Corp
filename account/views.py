@@ -26,7 +26,9 @@ def register_user(request):
 
             user.is_active = False
 
-            # return redirect('account:login')
+            send_email(user)
+
+            return redirect('account/email-verification-sent')
 
     else:
         form = UserCreationForm()
